@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Neon Chatbot</title>
+
+  <style>
+    body{
+      margin:0;
+      background:#05070d;
+      color:#e9f1ff;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+    .wrapper{
+      max-width:900px;
+      margin:30px auto;
+      padding:20px;
+      background:#0b1020;
+      border-radius:12px;
+      box-shadow:0 0 25px rgba(0,255,255,0.1);
+    }
+    h1{
+      text-align:center;
+      color:#00f0ff;
+      text-shadow:0 0 10px #00f0ff;
+    }
+    #messages{
+      height:400px;
+      overflow-y:auto;
+      background:#0a0f1a;
+      padding:15px;
+      border-radius:10px;
+      margin-bottom:15px;
+    }
+    .msg{
+      padding:10px;
+      margin-bottom:10px;
+      border-radius:10px;
+      white-space:pre-wrap;
+      line-height:1.35;
+    }
+    .user{
+      background:rgba(0,255,255,0.12);
+      border:1px solid rgba(0,255,255,0.3);
+    }
+    .bot{
+      background:rgba(255,0,180,0.1);
+      border:1px solid rgba(255,0,180,0.3);
+    }
+    textarea{
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:none;
+      background:#090d18;
+      color:white;
+      font-size:15px;
+      resize:none;
+      margin-bottom:10px;
+    }
+    button{
+      width:100%;
+      padding:12px;
+      margin-top:5px;
+      background:linear-gradient(90deg,#00f0ff,#ff2eb8);
+      border:none;
+      border-radius:12px;
+      color:#05070d;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+      box-shadow:0 0 15px #00f0ff;
+    }
+    button:active{
+      transform:scale(0.98);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrapper">
+    <h1>Neon AI Chatbot</h1>
+
+    <div id="messages"></div>
+
+    <textarea id="prompt" placeholder="Type your message..."></textarea>
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    const url = "/chat";   // Vercel proxy endpoint
+
+    function addMessage(text, who){
+      const box = document.getElementById("messages");
+      const div = document.createElement("div");
+      div.className = "msg " + (who === "user" ? "user" : "bot");
+      div.innerText = text;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function sendMessage(){
+      const input = document.getElementById("prompt");
+      const text = input.value.trim();
+      if(!text) return;
+
+      addMessage(text, "user");
+      input.value = "";
+
+      const data = {
+        message: text,
+        model: "llama-3.1-8b",
+        language: "en"
+      };
+
+      try{
+        const r = await fetch(url, {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify(data)
+        });
+
+        const json = await r.json();
+
+        if(json.choices && json.choices.length > 0)
+          addMessage(json.choices[0].message.content, "bot");
+        else
+          addMessage("Error: No reply from AI", "bot");
+
+      } catch(e){
+        addMessage("Error aaya bhai: " + e.message, "bot");
+      }
+    }
+
+    document.getElementById("prompt")
+      .addEventListener("keydown", (e)=>{
+        if(e.key === "Enter" && !e.shiftKey){
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+  </script>
+
+</body>
+</html>
