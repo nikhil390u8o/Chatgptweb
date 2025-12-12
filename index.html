@@ -72,9 +72,6 @@
       cursor:pointer;
       box-shadow:0 0 15px #00f0ff;
     }
-    button:active{
-      transform:scale(0.98);
-    }
   </style>
 </head>
 <body>
@@ -117,29 +114,29 @@
       try{
         const r = await fetch(url, {
           method:"POST",
-          headers:{"Content-Type":"application/json"},
+          headers:{ "Content-Type":"application/json" },
           body:JSON.stringify(data)
         });
 
         const json = await r.json();
 
-        if(json.choices && json.choices.length > 0)
+        if(json.choices && json.choices.length > 0){
           addMessage(json.choices[0].message.content, "bot");
-        else
-          addMessage("Error: No reply from AI", "bot");
+        } else {
+          addMessage("AI: Response empty or error.", "bot");
+        }
 
       } catch(e){
-        addMessage("Error aaya bhai: " + e.message, "bot");
+        addMessage("Error: " + e.message, "bot");
       }
     }
 
-    document.getElementById("prompt")
-      .addEventListener("keydown", (e)=>{
-        if(e.key === "Enter" && !e.shiftKey){
-          e.preventDefault();
-          sendMessage();
-        }
-      });
+    document.getElementById("prompt").addEventListener("keydown", (e)=>{
+      if(e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        sendMessage();
+      }
+    });
   </script>
 
 </body>
